@@ -2,85 +2,63 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 )
 
-func Test(t *testing.T) {
-	type testCase struct {
-		expense      expense
-		expectedTo   string
-		expectedCost float64
+func TestSendMessage(t *testing.T) {
+	tests := []struct {
+		formatter Formatter
+		expected  string
+	}{
+		{PlainText{message: "Hello, World!"}, "Hello, World!"},
+		{Bold{message: "Bold Message"}, "**Bold Message**"},
+		{Code{message: "Code Message"}, "`Code Message`"},
 	}
-	tests := []testCase{
-		{
-			email{isSubscribed: true, body: "Whoa there!", toAddress: "soldier@monty.com"},
-			"soldier@monty.com",
-			0.11,
-		},
-		{
-			sms{isSubscribed: false, body: "Halt! Who goes there?", toPhoneNumber: "+155555509832"},
-			"+155555509832",
-			2.1,
-		},
-	}
+
 	if withSubmit {
-		tests = append(tests, []testCase{
-			{
-				email{
-					isSubscribed: false,
-					body:         "It is I, Arthur, son of Uther Pendragon, from the castle of Camelot. King of the Britons, defeator of the Saxons, sovereign of all England!",
-					toAddress:    "soldier@monty.com",
-				},
-				"soldier@monty.com",
-				6.95,
-			},
-			{
-				email{
-					isSubscribed: true,
-					body:         "Pull the other one!",
-					toAddress:    "arthur@monty.com",
-				},
-				"arthur@monty.com",
-				0.19,
-			},
-			{
-				sms{
-					isSubscribed:  true,
-					body:          "I am. And this my trusty servant Patsy.",
-					toPhoneNumber: "+155555509832",
-				},
-				"+155555509832",
-				1.17,
-			},
-			{
-				invalid{},
-				"",
-				0.0,
-			},
-		}...)
+		tests = append(tests,
+			struct {
+				formatter Formatter
+				expected  string
+			}{Code{message: ""}, "``"},
+			struct {
+				formatter Formatter
+				expected  string
+			}{Bold{message: ""}, "****"},
+			struct {
+				formatter Formatter
+				expected  string
+			}{PlainText{message: ""}, ""},
+		)
 	}
 
 	passCount := 0
 	failCount := 0
 
-	for _, test := range tests {
-		to, cost := getExpenseReport(test.expense)
-		if to != test.expectedTo || cost != test.expectedCost {
-			failCount++
-			t.Errorf(`---------------------------------
-Inputs:     %+v
-Expecting:  (%v, %v)
-Actual:     (%v, %v)
-Fail`, test.expense, test.expectedTo, test.expectedCost, to, cost)
-		} else {
-			passCount++
-			fmt.Printf(`---------------------------------
-Inputs:     %+v
-Expecting:  (%v, %v)
-Actual:     (%v, %v)
+	for i, test := range tests {
+		testName := "Test Case " + strconv.Itoa(i+1)
+		t.Run(testName, func(t *testing.T) {
+			formattedMessage := SendMessage(test.formatter)
+			if formattedMessage != test.expected {
+				failCount++
+				t.Errorf(`---------------------------------
+%s
+Inputs:     (%v)
+Expecting:  %v
+Actual:     %v
+Fail`, testName, test.formatter, test.expected, formattedMessage)
+			} else {
+				passCount++
+				fmt.Printf(`---------------------------------
+%s
+Inputs:     (%v)
+Expecting:  %v
+Actual:     %v
 Pass
-`, test.expense, test.expectedTo, test.expectedCost, to, cost)
-		}
+`, testName, test.formatter, test.expected, formattedMessage)
+			}
+		})
 	}
 
 	fmt.Println("---------------------------------")
