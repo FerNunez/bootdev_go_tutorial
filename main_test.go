@@ -5,44 +5,48 @@ import (
 	"testing"
 )
 
-func Test(t *testing.T) {
+func TestCountGroupConnections(t *testing.T) {
 	type testCase struct {
-		costMultiplier   float64
-		maxCostInPennies int
-		expected         int
+		groupSize int
+		expected  int
 	}
-	tests := []testCase{
-		{1.1, 5, 4},
-		{1.3, 10, 5},
-		{1.35, 25, 7},
+	testCases := []testCase{
+		{1, 0},
+		{2, 1},
+		{3, 3},
+		{4, 6},
 	}
 	if withSubmit {
-		tests = append(tests, []testCase{
-			{1.2, 15, 7},
-			{1.3, 20, 7},
-		}...)
+		testCases = append(testCases,
+			[]testCase{
+				{0, 0},
+				{10, 45},
+				{100, 4950},
+				{1000, 499500},
+			}...,
+		)
 	}
 
 	passCount := 0
 	failCount := 0
 
-	for _, test := range tests {
-		output := getMaxMessagesToSend(test.costMultiplier, test.maxCostInPennies)
-		if output != test.expected {
+	for _, tc := range testCases {
+		result := countConnections(tc.groupSize)
+		if result != tc.expected {
 			failCount++
 			t.Errorf(`---------------------------------
-Inputs:     (%v, %v)
-Expecting:  %v
-Actual:     %v
-Fail`, test.costMultiplier, test.maxCostInPennies, test.expected, output)
+Group Size: %v
+Expecting: %v
+Actual:    %v
+Fail`, tc.groupSize, tc.expected, result)
 		} else {
 			passCount++
 			fmt.Printf(`---------------------------------
-Inputs:     (%v, %v)
-Expecting:  %v
-Actual:     %v
+Group Size: %v
+Expecting: %v
+Actual:    %v
 Pass
-`, test.costMultiplier, test.maxCostInPennies, test.expected, output)
+`, tc.groupSize, tc.expected, result)
 		}
 	}
 
@@ -50,6 +54,5 @@ Pass
 	fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 }
 
-// withSubmit is set at compile time depending on which button is used to run the tests
 var withSubmit = true
 

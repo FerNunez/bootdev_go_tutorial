@@ -1,24 +1,13 @@
 package main
 
-import (
-	"fmt"
-)
+func countConnections(groupSize int) int {
 
-func printPrimes(max int) {
-	// ?
+	total := 0
+	for i := 1; i <= groupSize; i++ {
+
+		for j := i+1; j <= groupSize; j++ {
+			total += 1
+		}
+	}
+	return total
 }
-
-// don't edit below this line
-
-func test(max int) {
-	fmt.Printf("Primes up to %v:\n", max)
-	printPrimes(max)
-	fmt.Println("===============================================================")
-}
-
-func main() {
-	test(10)
-	test(20)
-	test(30)
-}
-
