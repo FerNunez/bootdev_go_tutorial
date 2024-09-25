@@ -1,16 +1,24 @@
- package main
+package main
 
-func getMaxMessagesToSend(costMultiplier float64, maxCostInPennies int) int {
-	actualCostInPennies := 1.0
-	maxMessagesToSend := 1
-	balance := float64(maxCostInPennies) - actualCostInPennies
-	for balance > 0{
-		actualCostInPennies *= costMultiplier
-		balance -= actualCostInPennies
-		maxMessagesToSend++
-	}
-	if balance < 0 {
-		maxMessagesToSend--
-	}
-	return maxMessagesToSend
-} 
+import (
+	"fmt"
+)
+
+func printPrimes(max int) {
+	// ?
+}
+
+// don't edit below this line
+
+func test(max int) {
+	fmt.Printf("Primes up to %v:\n", max)
+	printPrimes(max)
+	fmt.Println("===============================================================")
+}
+
+func main() {
+	test(10)
+	test(20)
+	test(30)
+}
+
