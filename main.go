@@ -1,15 +1,22 @@
 package main
+import(
+	"errors"
+)
 
-func getMessageWithRetries(primary, secondary, tertiary string) ([3]string, [3]int) {
+const (
+	planFree = "free"
+	planPro  = "pro"
+)
 
-
-	primaryCost := len(primary)
-	secondaryCost := primaryCost + len(secondary)
-	tertiaryCost := secondaryCost + len(tertiary)
-
-
-	return [3]string{primary, secondary, tertiary}, [3]int{primaryCost, secondaryCost, tertiaryCost}
-
+func getMessageWithRetriesForPlan(plan string, messages [3]string) ([]string, error) {
 	// ?
+	switch plan{
+	case planPro:
+		return messages[:], nil
+	case planFree:
+		return messages[:2], nil
+	}
+	return nil, errors.New("unsupported plan")
+
 }
 
