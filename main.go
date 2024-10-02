@@ -1,17 +1,49 @@
 package main
 
-func indexOfFirstBadWord(msg []string, badWords []string) int {
-	// ?
+type Message interface {
+	Type() string
+}
 
+type TextMessage struct {
+	Sender  string
+	Content string
+}
 
-	for idxMsg, word := range msg{
-		for _, badWord := range badWords{
-			if word == badWord{
-				return idxMsg
-			}
+func (tm TextMessage) Type() string {
+	return "text"
+}
+
+type MediaMessage struct {
+	Sender    string
+	MediaType string
+	Content   string
+}
+
+func (mm MediaMessage) Type() string {
+	return "media"
+}
+
+type LinkMessage struct {
+	Sender  string
+	URL     string
+	Content string
+}
+
+func (lm LinkMessage) Type() string {
+	return "link"
+}
+
+// Don't touch above this line
+
+func filterMessages(messages []Message, filterType string) []Message {
+	response := make([]Message, 0)
+
+	for _, msg := range messages {
+		if msg.Type() == filterType {
+			response = append(response, msg)
 		}
-	}
 
-	return -1
+	}
+	return response
 }
 
