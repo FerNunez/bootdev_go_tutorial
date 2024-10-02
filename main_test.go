@@ -5,56 +5,82 @@ import (
 	"testing"
 )
 
-func TestIsValidPassword(t *testing.T) {
+func Test(t *testing.T) {
 	type testCase struct {
-		password string
-		isValid  bool
+		formatter func(string) string
+		messages  []string
+		expected  []string
 	}
-	testCases := []testCase{
-		{"Pass123", true},
-		{"pas", false},
-		{"Password", false},
-		{"123456", false},
+
+	tests := []testCase{
+		{
+			formatter: addSignature,
+			messages:  []string{"Hello, how are you?", "I hope you are well,"},
+			expected:  []string{"Hello, how are you? kind regards.", "I hope you are well, kind regards."},
+		},
+		{
+			formatter: addGreeting,
+			messages:  []string{"I'm doing well.", "Love your hair!"},
+			expected:  []string{"Hello! I'm doing well.", "Hello! Love your hair!"},
+		},
 	}
 	if withSubmit {
-		testCases = append(testCases,
-			[]testCase{
-				{"VeryLongPassword1", false},
-				{"Short", false},
-				{"1234short", false},
-				{"Short5", true},
-				{"P4ssword", true},
-			}...,
-		)
+		tests = append(tests, []testCase{
+			{
+				formatter: addGreeting,
+				messages:  []string{"", ""},
+				expected:  []string{"Hello! ", "Hello! "},
+			},
+			{
+				formatter: addGreeting,
+				messages:  []string{"I'm so sick of this crap.", "I need a change.", "Maybe I should go touch grass."},
+				expected:  []string{"Hello! I'm so sick of this crap.", "Hello! I need a change.", "Hello! Maybe I should go touch grass."},
+			},
+		}...)
 	}
 
 	passCount := 0
 	failCount := 0
 
-	for i, tc := range testCases {
-		t.Run(fmt.Sprintf("TestCase%d", i+1), func(t *testing.T) {
-			result := isValidPassword(tc.password)
-			if result != tc.isValid {
+	for _, test := range tests {
+		messages := getFormattedMessages(test.messages, test.formatter)
+		for i, message := range messages {
+			expected := test.expected[i]
+			input := test.messages[i]
+			if message != expected {
 				failCount++
-				t.Errorf(`---------------------------------
-Password:  "%s"
+				t.Errorf(`
+---------------------------------
+Test Failed:
+input:     %v
 Expecting: %v
 Actual:    %v
-Fail`, tc.password, tc.isValid, result)
+Fail
+`, input, expected, message)
 			} else {
 				passCount++
-				fmt.Printf(`---------------------------------
-Password:  "%s"
+				fmt.Printf(`
+---------------------------------
+Test Passed:
+input:     %v
 Expecting: %v
 Actual:    %v
 Pass
-`, tc.password, tc.isValid, result)
+`, input, expected, message)
 			}
-		})
+		}
 	}
 
 	fmt.Println("---------------------------------")
 	fmt.Printf("%d passed, %d failed\n", passCount, failCount)
+}
+
+func addSignature(message string) string {
+	return message + " kind regards."
+}
+
+func addGreeting(message string) string {
+	return "Hello! " + message
 }
 
 // withSubmit is set at compile time depending on which button is used to run the tests

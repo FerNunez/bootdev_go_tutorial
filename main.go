@@ -1,34 +1,10 @@
 package main
 
-import (
-	"unicode"
-)
-
-func isValidPassword(password string) bool {
-
-	if len(password) < 5 || len(password) > 12 {
-		return false
-
+func getFormattedMessages(messages []string, formatter func(string) string) []string {
+	formattedMessages := []string{}
+	for _, message := range messages {
+		formattedMessages = append(formattedMessages, formatter(message))
 	}
-
-	hasDigit := false
-	hasCapital := false
-	for _, c := range password {
-		if unicode.IsDigit(c) {
-			hasDigit = true
-		}
-
-		if unicode.IsUpper(c){
-			hasCapital = true
-		}
-
-		if hasCapital && hasDigit{
-			return true
-		}
-
-	}
-
-	return false
-
+	return formattedMessages
 }
 
