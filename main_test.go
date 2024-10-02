@@ -5,38 +5,26 @@ import (
 	"testing"
 )
 
-func TestFilterMessages(t *testing.T) {
-	messages := []Message{
-		TextMessage{"Alice", "Hello, World!"},
-		MediaMessage{"Bob", "image", "A beautiful sunset"},
-		LinkMessage{"Charlie", "http://example.com", "Example Domain"},
-		TextMessage{"Dave", "Another text message"},
-		MediaMessage{"Eve", "video", "Cute cat video"},
-		LinkMessage{"Frank", "https://boot.dev", "Learn Coding Online"},
+func TestIsValidPassword(t *testing.T) {
+	type testCase struct {
+		password string
+		isValid  bool
 	}
-
-	testCases := []struct {
-		filterType    string
-		expectedCount int
-		expectedType  string
-	}{
-		{"text", 2, "text"},
-		{"media", 2, "media"},
-		{"link", 2, "link"},
+	testCases := []testCase{
+		{"Pass123", true},
+		{"pas", false},
+		{"Password", false},
+		{"123456", false},
 	}
-
 	if withSubmit {
 		testCases = append(testCases,
-			struct {
-				filterType    string
-				expectedCount int
-				expectedType  string
-			}{"media", 2, "media"},
-			struct {
-				filterType    string
-				expectedCount int
-				expectedType  string
-			}{"text", 2, "text"},
+			[]testCase{
+				{"VeryLongPassword1", false},
+				{"Short", false},
+				{"1234short", false},
+				{"Short5", true},
+				{"P4ssword", true},
+			}...,
 		)
 	}
 
@@ -45,41 +33,22 @@ func TestFilterMessages(t *testing.T) {
 
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("TestCase%d", i+1), func(t *testing.T) {
-			filtered := filterMessages(messages, tc.filterType)
-			if len(filtered) != tc.expectedCount {
+			result := isValidPassword(tc.password)
+			if result != tc.isValid {
 				failCount++
 				t.Errorf(`---------------------------------
-Test Case %d - Filtering for %s
-Expecting:  %d messages
-Actual:     %d messages
-Fail`, i+1, tc.filterType, tc.expectedCount, len(filtered))
+Password:  "%s"
+Expecting: %v
+Actual:    %v
+Fail`, tc.password, tc.isValid, result)
 			} else {
 				passCount++
 				fmt.Printf(`---------------------------------
-Test Case %d - Filtering for %s
-Expecting:  %d messages
-Actual:     %d messages
+Password:  "%s"
+Expecting: %v
+Actual:    %v
 Pass
-`, i+1, tc.filterType, tc.expectedCount, len(filtered))
-			}
-
-			for _, m := range filtered {
-				if m.Type() != tc.expectedType {
-					failCount++
-					t.Errorf(`---------------------------------
-Test Case %d - Message Type Check
-Expecting:  %s message
-Actual:     %s message
-Fail`, i+1, tc.expectedType, m.Type())
-				} else {
-					passCount++
-					fmt.Printf(`---------------------------------
-Test Case %d - Message Type Check
-Expecting:  %s message
-Actual:     %s message
-Pass
-`, i+1, tc.expectedType, m.Type())
-				}
+`, tc.password, tc.isValid, result)
 			}
 		})
 	}
@@ -88,5 +57,6 @@ Pass
 	fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 }
 
+// withSubmit is set at compile time depending on which button is used to run the tests
 var withSubmit = true
 

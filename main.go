@@ -1,49 +1,34 @@
 package main
 
-type Message interface {
-	Type() string
-}
+import (
+	"unicode"
+)
 
-type TextMessage struct {
-	Sender  string
-	Content string
-}
+func isValidPassword(password string) bool {
 
-func (tm TextMessage) Type() string {
-	return "text"
-}
+	if len(password) < 5 || len(password) > 12 {
+		return false
 
-type MediaMessage struct {
-	Sender    string
-	MediaType string
-	Content   string
-}
+	}
 
-func (mm MediaMessage) Type() string {
-	return "media"
-}
+	hasDigit := false
+	hasCapital := false
+	for _, c := range password {
+		if unicode.IsDigit(c) {
+			hasDigit = true
+		}
 
-type LinkMessage struct {
-	Sender  string
-	URL     string
-	Content string
-}
+		if unicode.IsUpper(c){
+			hasCapital = true
+		}
 
-func (lm LinkMessage) Type() string {
-	return "link"
-}
-
-// Don't touch above this line
-
-func filterMessages(messages []Message, filterType string) []Message {
-	response := make([]Message, 0)
-
-	for _, msg := range messages {
-		if msg.Type() == filterType {
-			response = append(response, msg)
+		if hasCapital && hasDigit{
+			return true
 		}
 
 	}
-	return response
+
+	return false
+
 }
 
