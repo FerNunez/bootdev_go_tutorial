@@ -1,22 +1,27 @@
 package main
 
-func getNameCounts(names []string) map[rune]map[string]int {
-	// Your code here
+import (
+	"strings"
+)
 
-	result := make(map[rune]map[string]int)
-	for _, name := range names {
+func countDistinctWords(messages []string) int {
 
-		runes := []rune(name)
+	words := make(map[string]int)
+	total := 0
 
-		
+	for _, message := range messages {
 
-		if _, ok := result[runes[0]];!ok {
-			result[runes[0]] = make(map[string]int)
+		for _, word := range strings.Fields(message) {
+
+			lowerWorld := strings.ToLower(word)
+			if _, ok := words[lowerWorld]; !ok {
+
+				words[lowerWorld] = 0
+				total += 1
+			}
 
 		}
-
-		result[runes[0]][name] += 1
 	}
-	return result
+	return total
 }
 
