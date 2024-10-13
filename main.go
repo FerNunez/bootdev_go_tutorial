@@ -1,27 +1,53 @@
 package main
 
-import (
-	"strings"
-)
+func findSuggestedFriends(username string, friendships map[string][]string) []string {
 
-func countDistinctWords(messages []string) int {
+	newSuggestions := make(map[string]bool)
+	alreadyFriend := make(map[string]bool)
 
-	words := make(map[string]int)
-	total := 0
+	// get username's friends
+	if userFriends, ok := friendships[username]; ok {
 
-	for _, message := range messages {
+		// add already friend into a map/hashset
+		for _, userFriendName := range userFriends {
+			alreadyFriend[userFriendName] = false
+		}
 
-		for _, word := range strings.Fields(message) {
+		// loop friends friends
+		for _, userFriendName := range userFriends {
 
-			lowerWorld := strings.ToLower(word)
-			if _, ok := words[lowerWorld]; !ok {
+			if friendsOfFriends, okThereIsMap := friendships[userFriendName]; okThereIsMap {
 
-				words[lowerWorld] = 0
-				total += 1
+				for _, friendsOfFriendName := range friendsOfFriends {
+
+					isNotUser := friendsOfFriendName != username
+					_, okAlreadyFriend := alreadyFriend[friendsOfFriendName]
+					_, okNewSuggestions := newSuggestions[friendsOfFriendName]
+
+					if isNotUser && !okAlreadyFriend && !okNewSuggestions {
+						newSuggestions[friendsOfFriendName] = true
+					}
+
+				}
+
 			}
 
 		}
-	}
-	return total
-}
 
+	}
+
+	if numbSugestions := len(newSuggestions); numbSugestions > 0 {
+
+		v := make([]string, 0, len(newSuggestions))
+
+		for key := range newSuggestions {
+			v = append(v, key)
+		}
+
+		return v
+
+	}
+
+	return nil
+
+}
