@@ -2,129 +2,101 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 )
 
-func TestLogAndDelete(t *testing.T) {
+func Test(t *testing.T) {
 	type testCase struct {
-		users         map[string]user
-		name          string
-		expectedUsers map[string]user
-		expectedLog   string
+		recipient string
+		text      string
+		expected  string
 	}
 	tests := []testCase{
 		{
-			users: map[string]user{
-				"laura": {name: "laura", number: 4355556023, admin: false},
-				"dale":  {name: "dale", number: 8015558937, admin: true},
-			},
-			name: "laura",
-			expectedUsers: map[string]user{
-				"dale": {name: "dale", number: 8015558937, admin: true},
-			},
-			expectedLog: logDeleted,
+			recipient: "Honey Bunny",
+			text:      "I love you, Pumpkin.",
+			expected: `
+To: Honey Bunny
+Message: I love you, Pumpkin.
+`,
 		},
 		{
-			users: map[string]user{
-				"audrey": {name: "audrey", number: 4355556024, admin: false},
-				"bob":    {name: "bob", number: 8015558938, admin: true},
-				"bobby":  {name: "bobby", number: 8015558939, admin: true},
-			},
-			name: "bobby",
-			expectedUsers: map[string]user{
-				"audrey": {name: "audrey", number: 4355556024, admin: false},
-				"bob":    {name: "bob", number: 8015558938, admin: true},
-			},
-			expectedLog: logAdmin,
+			recipient: "Pumpkin",
+			text:      "I love you, Honey Bunny.",
+			expected: `
+To: Pumpkin
+Message: I love you, Honey Bunny.
+`,
 		},
 	}
-
 	if withSubmit {
-		tests = append(tests, testCase{
-			users: map[string]user{
-				"log lady": {name: "log lady", number: 4355556025, admin: false},
-				"shelly":   {name: "shelly", number: 8015558940, admin: false},
-				"leland":   {name: "leland", number: 8015558941, admin: false},
+		tests = append(tests, []testCase{
+			{
+				recipient: "poor sap 1",
+				text:      "And you will know My name is the Lord when I lay My vengeance upon thee.",
+				expected: `
+To: poor sap 1
+Message: And you will know My name is the Lord when I lay My vengeance upon thee.
+`,
 			},
-			name: "laura",
-			expectedUsers: map[string]user{
-				"log lady": {name: "log lady", number: 4355556025, admin: false},
-				"shelly":   {name: "shelly", number: 8015558940, admin: false},
-				"leland":   {name: "leland", number: 8015558941, admin: false},
+			{
+				recipient: "Fabienne",
+				text:      "Zed's dead, baby. Zed's dead.",
+				expected: `
+To: Fabienne
+Message: Zed's dead, baby. Zed's dead.
+`,
 			},
-			expectedLog: logNotFound,
-		})
+		}...)
 	}
 
 	passCount := 0
 	failCount := 0
 
 	for _, test := range tests {
-		originalMap := getMapCopy(test.users)
-		log := logAndDelete(test.users, test.name)
-		if log != test.expectedLog || !compareMaps(test.users, test.expectedUsers) {
+		m := Message{Recipient: test.recipient, Text: test.text}
+		messageText := getMessageText(m)
+		if strings.TrimSpace(messageText) != strings.TrimSpace(test.expected) {
 			failCount++
-			t.Errorf(`---------------------------------
-Test Failed:
-  Users: 
-%s
-  Name: %v
-  Expected Users: 
-%s
-  Actual Users: 
-%s
-  Expected Log: %s
-  Actual Log: %s
-`, formatMap(originalMap), test.name, formatMap(test.expectedUsers), formatMap(test.users), test.expectedLog, log)
+			t.Errorf(`Test Failed:
+input:
+* Recipient: %v
+* Text: %v
+expected:
+%v
+actual:
+%v
+`,
+				m.Recipient,
+				m.Text,
+				test.expected,
+				messageText,
+			)
 		} else {
 			passCount++
-			fmt.Printf(`---------------------------------
-Test Passed:
-  Users:
-%s
-  Name: %v
-  Expected Users:
-%s
-  Actual Users:
-%s
-  Expected Log: %s
-  Actual Log: %s
-`, formatMap(originalMap), test.name, formatMap(test.expectedUsers), formatMap(test.users), test.expectedLog, log)
+			fmt.Printf(`Test Passed:
+input:
+* Recipient: %v
+* Text: %v
+expected:
+%v
+actual:
+%v
+`,
+				m.Recipient,
+				m.Text,
+				test.expected,
+				messageText,
+			)
 		}
+		fmt.Println("------------------------------")
 	}
 
-	fmt.Println("---------------------------------")
 	fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 }
 
-func getMapCopy(m map[string]user) map[string]user {
-	copy := make(map[string]user)
-	for key, value := range m {
-		copy[key] = value
-	}
-	return copy
-}
-
-func formatMap(m map[string]user) string {
-	var str string
-	for key, value := range m {
-		str += fmt.Sprintf("  * %s: %v\n", key, value)
-	}
-	return str
-}
-
-func compareMaps(map1, map2 map[string]user) bool {
-	if len(map1) != len(map2) {
-		return false
-	}
-	for key, value1 := range map1 {
-		if value2, exist := map2[key]; !exist || value1 != value2 {
-			return false
-		}
-	}
-	return true
-}
-
-// withSubmit is set at compile time depending on which button is used to run the tests
+// withSubmit is set at compile time depending
+// on which button is used to run the tests
 var withSubmit = true
 
