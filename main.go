@@ -1,18 +1,13 @@
 package main
 
-import (
-	"strings"
-)
-
-func removeProfanity(message *string) {
-
-	if message == nil{
-		return
-	}
-	messageVal := *message
-	messageVal = strings.ReplaceAll(messageVal, "fubb", "****")
-	messageVal = strings.ReplaceAll(messageVal, "shiz", "****")
-	messageVal = strings.ReplaceAll(messageVal, "witch", "*****")
-	*message = messageVal
+func (e *email) setMessage(newMessage string) {
+	e.message = newMessage
 }
 
+// don't edit below this line
+
+type email struct {
+	message     string
+	fromAddress string
+	toAddress   string
+}
