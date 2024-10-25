@@ -1,45 +1,15 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 )
 
-type customer struct {
-	id      int
-	balance float64
+func test(text string) {
+	fmt.Println(text)
 }
 
-type transactionType string
-
-const (
-	transactionDeposit    transactionType = "deposit"
-	transactionWithdrawal transactionType = "withdrawal"
-)
-
-type transaction struct {
-	customerID      int
-	amount          float64
-	transactionType transactionType
-}
-
-// Don't touch above this line
-
-// ?
-func updateBalance(c *customer, t transaction) error {
-
-	switch t.transactionType {
-	case transactionDeposit:
-		c.balance += t.amount
-	case transactionWithdrawal:
-		if c.balance < t.amount {
-			return errors.New("insufficient funds")
-		} else {
-			c.balance -= t.amount
-		}
-	default:
-		return errors.New("unknown transaction type")
-	}
-
-	return nil
+func main() {
+	test("starting Mailio server")
+	test("stopping Mailio server")
 }
 
