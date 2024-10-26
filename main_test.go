@@ -2,102 +2,108 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"testing"
+	"time"
 )
 
-func TestUpdateBalance(t *testing.T) {
-	tests := []struct {
-		name            string
-		initialCustomer customer
-		transaction     transaction
-		expectedBalance float64
-		expectError     bool
-		errorMessage    string
-	}{
-		{
-			name:            "Deposit operation",
-			initialCustomer: customer{id: 1, balance: 100.0},
-			transaction:     transaction{customerID: 1, amount: 50.0, transactionType: transactionDeposit},
-			expectedBalance: 150.0,
-			expectError:     false,
-		},
-		{
-			name:            "Withdrawal operation",
-			initialCustomer: customer{id: 2, balance: 200.0},
-			transaction:     transaction{customerID: 2, amount: 100.0, transactionType: transactionWithdrawal},
-			expectedBalance: 100.0,
-			expectError:     false,
-		},
+func Test(t *testing.T) {
+	type testCase struct {
+		emails [3]email
+		isOld  [3]bool
+	}
+	tests := []testCase{
+		{[3]email{
+			{
+				body: "Words are pale shadows of forgotten names. As names have power, words have power.",
+				date: time.Date(2019, 2, 0, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				body: "It's like everyone tells a story about themselves inside their own head.",
+				date: time.Date(2021, 3, 1, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				body: "Bones mend. Regret stays with you forever.",
+				date: time.Date(2022, 1, 2, 0, 0, 0, 0, time.UTC),
+			},
+		}, [3]bool{true, false, false}},
+		{[3]email{
+			{
+				body: "Music is a proud, temperamental mistress.",
+				date: time.Date(2018, 0, 0, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				body: "Have you heard of that website Boot.dev?",
+				date: time.Date(2017, 0, 0, 0, 0, 0, 0, time.UTC),
+			},
+			{
+				body: "It's awesome honestly.",
+				date: time.Date(2016, 0, 0, 0, 0, 0, 0, time.UTC),
+			},
+		}, [3]bool{true, true, true}},
 	}
 	if withSubmit {
-		tests = append(tests, []struct {
-			name            string
-			initialCustomer customer
-			transaction     transaction
-			expectedBalance float64
-			expectError     bool
-			errorMessage    string
-		}{
-			{
-				name:            "insufficient funds for withdrawal",
-				initialCustomer: customer{id: 3, balance: 50.0},
-				transaction:     transaction{customerID: 3, amount: 100.0, transactionType: transactionWithdrawal},
-				expectedBalance: 50.0,
-				expectError:     true,
-				errorMessage:    "insufficient funds",
-			},
-			{
-				name:            "unknown transaction type",
-				initialCustomer: customer{id: 4, balance: 100.0},
-				transaction:     transaction{customerID: 4, amount: 50.0, transactionType: "unknown"},
-				expectedBalance: 100.0,
-				expectError:     true,
-				errorMessage:    "unknown transaction type",
-			},
+		tests = append(tests, []testCase{
+			{[3]email{
+				{
+					body: "I have stolen princesses back from sleeping barrow kings.",
+					date: time.Date(2019, 0, 0, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					body: "I burned down the town of Trebon",
+					date: time.Date(2019, 6, 6, 0, 0, 0, 0, time.UTC),
+				},
+				{
+					body: "I have spent the night with Felurian and left with both my sanity and my life.",
+					date: time.Date(2022, 7, 0, 0, 0, 0, 0, time.UTC),
+				},
+			}, [3]bool{true, true, false}},
 		}...)
 	}
 
 	passCount := 0
 	failCount := 0
 
-	for _, tc := range tests {
-		t.Run(tc.name, func(t *testing.T) {
-			err := updateBalance(&tc.initialCustomer, tc.transaction)
-			failureMessage := ""
-
-			if (err != nil) != tc.expectError {
-				failureMessage += "Unexpected error presence: expected an error but didn't get one, or vice versa.\n"
-			} else if err != nil && err.Error() != tc.errorMessage {
-				failureMessage += "Incorrect error message.\n"
-			}
-
-			if tc.initialCustomer.balance != tc.expectedBalance {
-				failureMessage += "Balance not updated as expected.\n"
-			}
-
-			if failureMessage != "" {
-				failCount++
-				failureMessage = "FAIL\n" + failureMessage +
-					"Transaction: " + string(tc.transaction.transactionType) +
-					fmt.Sprintf(", Amount: %.2f\n", tc.transaction.amount) +
-					fmt.Sprintf("Expected balance: %.2f, Actual balance: %.2f\n", tc.expectedBalance, tc.initialCustomer.balance)
-				t.Errorf(failureMessage)
-			} else {
-				passCount++
-				successMessage := "PASSED\n" +
-					"Transaction: " + string(tc.transaction.transactionType) +
-					fmt.Sprintf(", Amount: %.2f\n", tc.transaction.amount) +
-					fmt.Sprintf("Expected balance: %.2f, Actual balance: %.2f\n", tc.expectedBalance, tc.initialCustomer.balance)
-				fmt.Println(successMessage)
-			}
-			fmt.Println("---------------------------------")
-		})
+	for _, test := range tests {
+		isOld := checkEmailAge(test.emails)
+		if !slices.Equal(isOld[:], test.isOld[:]) {
+			failCount++
+			t.Errorf(`
+---------------------------------
+Test Failed:
+  input:
+    * %v | %v
+    * %v | %v
+    * %v | %v
+  expected: %v
+  actual:   %v
+`,
+				test.emails[0].body, test.emails[0].date,
+				test.emails[1].body, test.emails[1].date,
+				test.emails[2].body, test.emails[2].date,
+				test.isOld, isOld)
+		} else {
+			passCount++
+			fmt.Printf(`
+---------------------------------
+Test Passed:
+  input:
+    * %v | %v
+    * %v | %v
+    * %v | %v
+  expected: %v
+  actual:   %v
+`,
+				test.emails[0].body, test.emails[0].date,
+				test.emails[1].body, test.emails[1].date,
+				test.emails[2].body, test.emails[2].date,
+				test.isOld, isOld)
+		}
 	}
-
+	fmt.Println("---------------------------------")
 	fmt.Printf("%d passed, %d failed\n", passCount, failCount)
 }
 
-// withSubmit is set at compile time depending
-// on which button is used to run the tests
+// withSubmit is set at compile time depending on which button is used to run the tests
 var withSubmit = true
 
