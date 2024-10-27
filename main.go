@@ -1,57 +1,38 @@
 package main
 
-import (
-	"fmt"
-	"time"
-)
+import "time"
 
-func pingPong(numPings int) {
-	pings := make(chan struct{})
-	pongs := make(chan struct{})
-	go ponger(pings, pongs)
-	go pinger(pings, pongs, numPings)
-	func() {
-		i := 0
-		for range pongs {
-			fmt.Println("got pong", i)
-			i++
+func processMessages(messages []string) []string {
+	// ?
+
+	output := make([]string, 0)
+	ch := make(chan string)
+	for _, m := range messages {
+		go func(ch chan string, m string) {
+
+			ch <- process(m)
+		}(ch, m)
+	}
+
+	count := 0
+	for i := range ch {
+		println("waiting to read!")
+		output = append(output, i)
+
+		count += 1
+		if count >= len(messages) {
+			break
 		}
-		fmt.Println("pongs done")
-	}()
+
+	}
+	close(ch)
+	return output
 }
 
 // don't touch below this line
 
-func pinger(pings, pongs chan struct{}, numPings int) {
-	sleepTime := 50 * time.Millisecond
-	for i := 0; i < numPings; i++ {
-		fmt.Printf("sending ping %v\n", i)
-		pings <- struct{}{}
-		time.Sleep(sleepTime)
-		sleepTime *= 2
-	}
-	close(pings)
+func process(message string) string {
+	time.Sleep(1 * time.Second)
+	return message + "-processed"
 }
 
-func ponger(pings, pongs chan struct{}) {
-	i := 0
-	for range pings {
-		fmt.Printf("got ping %v, sending pong %v\n", i, i)
-		pongs <- struct{}{}
-		i++
-	}
-	fmt.Println("pings done")
-	close(pongs)
-}
-
-func test(numPings int) {
-	fmt.Println("Starting game...")
-	pingPong(numPings)
-	fmt.Println("===== Game over =====")
-}
-
-func main() {
-	test(4)
-	test(3)
-	test(2)
-}
