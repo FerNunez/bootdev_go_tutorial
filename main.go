@@ -1,38 +1,38 @@
 package main
 
-import "time"
+import (
+	"sync"
+	"time"
+)
 
-func processMessages(messages []string) []string {
-	// ?
+type safeCounter struct {
+	counts map[string]int
+	mu     *sync.Mutex
+}
 
-	output := make([]string, 0)
-	ch := make(chan string)
-	for _, m := range messages {
-		go func(ch chan string, m string) {
+func (sc safeCounter) inc(key string) {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	sc.slowIncrement(key)
+}
 
-			ch <- process(m)
-		}(ch, m)
-	}
-
-	count := 0
-	for i := range ch {
-		println("waiting to read!")
-		output = append(output, i)
-
-		count += 1
-		if count >= len(messages) {
-			break
-		}
-
-	}
-	close(ch)
-	return output
+func (sc safeCounter) val(key string) int {
+	sc.mu.Lock()
+	defer sc.mu.Unlock()
+	return sc.slowVal(key)
 }
 
 // don't touch below this line
 
-func process(message string) string {
-	time.Sleep(1 * time.Second)
-	return message + "-processed"
+func (sc safeCounter) slowIncrement(key string) {
+	tempCounter := sc.counts[key]
+	time.Sleep(time.Microsecond)
+	tempCounter++
+	sc.counts[key] = tempCounter
+}
+
+func (sc safeCounter) slowVal(key string) int {
+	time.Sleep(time.Microsecond)
+	return sc.counts[key]
 }
 
