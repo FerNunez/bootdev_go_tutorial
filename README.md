@@ -1,18 +1,19 @@
 Boot.dev go tutorial:
 
-Ch 1. Variables 
-Ch 2. Conditionals
-Ch 3. Functions 
-Ch 4. Structs 
-Ch 5. Interfaces 
-Ch 6. Errors 
-Ch 7. Loops 
-Ch 8. Slices 
-Ch 9. Maps 
-Ch 10. Pointers 
-Ch 11. Packages and Modules 
-Ch 12. Channels 
-Ch 13. Mutexes 
-Ch 14. Generics 
-Ch 15. Enums 
-Ch 16. Quiz
+1. Ch 1. Variables 
+1. Ch 2. Conditionals
+1. Ch 3. Functions 
+1. Ch 4. Structs 
+1. Ch 5. Interfaces 
+1. Ch 6. Errors 
+1. Ch 7. Loops 
+1. Ch 8. Slices 
+1. Ch 9. Maps 
+1. Ch 10. Pointers 
+1. Ch 11. Packages and Modules 
+1. Ch 12. Channels 
+1. Ch 13. Mutexes 
+1. Ch 14. Generics 
+1. Ch 15. Enums 
+1. Ch 16. Quiz
+
